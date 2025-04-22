@@ -5,6 +5,7 @@ import { Button } from './ui/button';
 import { Camera, Search, MapPin } from 'lucide-react';
 import { PromptData } from '../types/game';
 import { useToast } from '@/hooks/use-toast';
+import CaptureImage from './CaptureImage';
 
 interface PromptMarkerProps {
   prompt: PromptData;
@@ -44,6 +45,7 @@ const PromptMarker: React.FC<PromptMarkerProps> = ({ prompt, position, onSelect 
 const Map: React.FC = () => {
   const { state, setActivePrompt, getRandomPrompt } = useGame();
   const [promptMarkers, setPromptMarkers] = useState<Array<{ prompt: PromptData; position: { x: number; y: number } }>>([]);
+  const [showCaptureModal, setShowCaptureModal] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,6 +93,16 @@ const Map: React.FC = () => {
     });
   };
 
+  const handleOpenCamera = () => {
+    if (state.activePrompt) {
+      setShowCaptureModal(true);
+    }
+  };
+
+  const handleCloseCamera = () => {
+    setShowCaptureModal(false);
+  };
+
   return (
     <div className="relative h-[calc(100vh-13rem)] overflow-hidden bg-[#f0f2f5] dark:bg-gray-900 rounded-lg border border-tech-light/30">
       {/* Map Background - we'd use a real map in a production app */}
@@ -127,6 +139,7 @@ const Map: React.FC = () => {
         <Button 
           className={`rounded-full w-16 h-16 ${state.activePrompt ? 'bg-tech-primary' : 'bg-gray-400'} hover:bg-tech-secondary transition-all duration-300 shadow-lg`}
           disabled={!state.activePrompt}
+          onClick={handleOpenCamera}
         >
           <Camera className="w-8 h-8 text-white" />
         </Button>
@@ -147,6 +160,13 @@ const Map: React.FC = () => {
           Scan Area
         </Button>
       </div>
+
+      {/* Image Capture Modal */}
+      {showCaptureModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <CaptureImage onClose={handleCloseCamera} />
+        </div>
+      )}
     </div>
   );
 };
