@@ -107,7 +107,7 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
               : undefined
           },
           isVerified: true,
-          moderationStatus: "approved",
+          moderationStatus: "approved" as "approved" | "pending" | "rejected",
           moderationFlags: analysis.moderationFlags || {},
           moderationScore: analysis.moderationScore,
           isAppropriate: analysis.isAppropriate,
