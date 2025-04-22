@@ -1,4 +1,3 @@
-
 import { 
   PromptData, 
   ImageSubmission, 
@@ -216,7 +215,13 @@ export const MOCK_IMAGE_SUBMISSIONS: ImageSubmission[] = [
       chips: 5,
       robotPart: MOCK_ROBOT_PARTS[2]
     },
-    isVerified: true
+    isVerified: true,
+    moderationStatus: "approved",
+    moderationFlags: {},
+    moderationScore: 0,
+    isAppropriate: true,
+    isRelevant: true,
+    isHighQuality: true
   }
 ];
 
