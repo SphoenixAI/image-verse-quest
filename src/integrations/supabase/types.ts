@@ -9,7 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      image_submissions: {
+        Row: {
+          analysis: Json | null
+          created_at: string
+          id: string
+          image_url: string
+          is_appropriate: boolean | null
+          is_high_quality: boolean | null
+          is_relevant: boolean | null
+          moderation_flags: Json | null
+          moderation_score: number | null
+          moderation_status: string
+          prompt_id: string
+          user_id: string | null
+          votes: Json | null
+        }
+        Insert: {
+          analysis?: Json | null
+          created_at?: string
+          id?: string
+          image_url: string
+          is_appropriate?: boolean | null
+          is_high_quality?: boolean | null
+          is_relevant?: boolean | null
+          moderation_flags?: Json | null
+          moderation_score?: number | null
+          moderation_status?: string
+          prompt_id: string
+          user_id?: string | null
+          votes?: Json | null
+        }
+        Update: {
+          analysis?: Json | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          is_appropriate?: boolean | null
+          is_high_quality?: boolean | null
+          is_relevant?: boolean | null
+          moderation_flags?: Json | null
+          moderation_score?: number | null
+          moderation_status?: string
+          prompt_id?: string
+          user_id?: string | null
+          votes?: Json | null
+        }
+        Relationships: []
+      }
+      moderation_logs: {
+        Row: {
+          created_at: string
+          decision: string
+          id: string
+          image_id: string
+          reason: string | null
+          reviewer_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          decision: string
+          id?: string
+          image_id: string
+          reason?: string | null
+          reviewer_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          decision?: string
+          id?: string
+          image_id?: string
+          reason?: string | null
+          reviewer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_logs_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "image_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

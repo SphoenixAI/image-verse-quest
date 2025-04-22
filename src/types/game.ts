@@ -1,4 +1,3 @@
-
 // Game Types
 
 export interface PromptData {
@@ -20,6 +19,13 @@ export interface ImageSubmission {
   promptId: string;
   imageUrl: string;
   timestamp: Date;
+  // Moderation fields
+  moderationStatus: "pending" | "approved" | "rejected";
+  moderationFlags?: Record<string, any>;
+  moderationScore?: number;
+  isAppropriate?: boolean | null;
+  isRelevant?: boolean | null;
+  isHighQuality?: boolean | null;
   analysis: ComputerVisionAnalysis | null;
   voteCount: {
     authentic: number;
@@ -130,4 +136,14 @@ export interface GameState {
   };
   quests: DailyQuest[];
   activePrompt: PromptData | null;
+}
+
+// Moderation log type (optional, added for completeness)
+export interface ModerationLog {
+  id: string;
+  imageId: string;
+  reviewerId: string;
+  decision: string;
+  reason?: string;
+  timestamp: Date;
 }
