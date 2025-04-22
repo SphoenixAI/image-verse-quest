@@ -1,13 +1,45 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import React, { useState } from 'react';
+import { GameProvider } from '../context/GameContext';
+import Header from '../components/Header';
+import BottomNav from '../components/BottomNav';
+import Map from '../components/Map';
+import Collection from '../components/Collection';
+import Robot from '../components/Robot';
+import Quests from '../components/Quests';
+import Profile from '../components/Profile';
+import { v4 as uuidv4 } from 'uuid';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState('map');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'map':
+        return <Map />;
+      case 'collection':
+        return <Collection />;
+      case 'robot':
+        return <Robot />;
+      case 'quests':
+        return <Quests />;
+      case 'profile':
+        return <Profile />;
+      default:
+        return <Map />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <GameProvider>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-1 overflow-auto">
+          {renderContent()}
+        </main>
+        <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
       </div>
-    </div>
+    </GameProvider>
   );
 };
 

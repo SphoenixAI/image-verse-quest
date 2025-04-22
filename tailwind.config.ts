@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Custom game colors
+				tech: {
+					primary: '#8B5CF6',    // Vivid purple
+					secondary: '#7E69AB',  // Secondary purple
+					accent: '#0EA5E9',     // Ocean blue
+					light: '#E5DEFF',      // Soft purple
+					dark: '#1A1F2C',       // Dark purple
+				},
+				chips: '#F97316',          // Bright orange for AI Chips currency
+				rare: '#D946EF',           // Magenta pink for rare items
+				common: '#33C3F0',         // Sky blue for common items
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +96,31 @@ export default {
 					to: {
 						height: '0'
 					}
-				}
+				},
+				'pulse-gentle': {
+					'0%, 100%': { opacity: '1' },
+					'50%': { opacity: '0.7' },
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' },
+				},
+				'slide-up': {
+					'0%': { transform: 'translateY(100%)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' },
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-gentle': 'pulse-gentle 2s ease-in-out infinite',
+				'float': 'float 5s ease-in-out infinite',
+				'slide-up': 'slide-up 0.3s ease-out',
+				'fade-in': 'fade-in 0.4s ease-out',
 			}
 		}
 	},
