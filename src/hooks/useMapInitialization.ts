@@ -8,12 +8,14 @@ export const useMapInitialization = (mapboxToken: string | undefined) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const playerMarker = useRef<mapboxgl.Marker | null>(null);
+  const isMapInitialized = useRef<boolean>(false);
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!mapboxToken || !mapContainer.current) return;
+    if (!mapboxToken || !mapContainer.current || isMapInitialized.current) return;
     
     mapboxgl.accessToken = mapboxToken;
+    isMapInitialized.current = true;
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -22,7 +24,8 @@ export const useMapInitialization = (mapboxToken: string | undefined) => {
       zoom: 16
     });
 
-    map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    const navControl = new mapboxgl.NavigationControl();
+    map.current.addControl(navControl, 'top-right');
     
     const geolocateControl = new mapboxgl.GeolocateControl({
       positionOptions: {
@@ -37,8 +40,9 @@ export const useMapInitialization = (mapboxToken: string | undefined) => {
     return () => {
       map.current?.remove();
       map.current = null;
+      isMapInitialized.current = false;
     };
-  }, [mapboxToken, userLocation]);
+  }, [mapboxToken]);
 
   useEffect(() => {
     if (!mapboxToken) return;
@@ -89,7 +93,7 @@ export const useMapInitialization = (mapboxToken: string | undefined) => {
     return () => {
       navigator.geolocation.clearWatch(watchId);
     };
-  }, [mapboxToken, map.current, toast]);
+  }, [mapboxToken, toast]);
 
   return { mapContainer, map, userLocation };
 };
