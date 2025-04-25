@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import { Button } from './ui/button';
@@ -8,9 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import CaptureImage from './CaptureImage';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-
-// Temporary Mapbox token input for development
-const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || '';
+import { useMapboxToken } from '@/hooks/useMapboxToken';
 
 interface PromptMarkerProps {
   prompt: PromptData;
@@ -83,17 +80,15 @@ const Map: React.FC = () => {
   const { state, setActivePrompt, getRandomPrompt } = useGame();
   const [promptMarkers, setPromptMarkers] = useState<Array<{ prompt: PromptData; position: { x: number; y: number } }>>([]);
   const [showCaptureModal, setShowCaptureModal] = useState(false);
-  const [mapboxToken, setMapboxToken] = useState<string>(MAPBOX_TOKEN);
-  const [showTokenInput, setShowTokenInput] = useState(!MAPBOX_TOKEN);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const { toast } = useToast();
+  const { data: mapboxToken, isLoading: isLoadingToken, error: tokenError } = useMapboxToken();
   
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const playerMarker = useRef<mapboxgl.Marker | null>(null);
   const promptMapMarkers = useRef<mapboxgl.Marker[]>([]);
 
-  // Initialize the map
   useEffect(() => {
     if (!mapboxToken || !mapContainer.current) return;
     
@@ -101,15 +96,13 @@ const Map: React.FC = () => {
     
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/streets-v12', // You can customize this style
-      center: userLocation || [-74.5, 40], // Default location (will be updated with user's location)
-      zoom: 16 // Zoom level appropriate for a game like Pokemon Go
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: userLocation || [-74.5, 40],
+      zoom: 16
     });
 
-    // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
     
-    // Add geolocate control
     const geolocateControl = new mapboxgl.GeolocateControl({
       positionOptions: {
         enableHighAccuracy: true
@@ -120,14 +113,12 @@ const Map: React.FC = () => {
     
     map.current.addControl(geolocateControl);
     
-    // Cleanup
     return () => {
       map.current?.remove();
       map.current = null;
     };
   }, [mapboxToken]);
 
-  // Get user's location and update the map
   useEffect(() => {
     if (!mapboxToken) return;
     
@@ -136,15 +127,12 @@ const Map: React.FC = () => {
         const { latitude, longitude } = position.coords;
         setUserLocation([longitude, latitude]);
         
-        // Center map on user's location if it's the first location update
         if (map.current && !playerMarker.current) {
           map.current.setCenter([longitude, latitude]);
         }
         
-        // Update or create player marker
         if (userLocation && map.current) {
           if (!playerMarker.current) {
-            // Create player marker element
             const el = document.createElement('div');
             el.className = 'player-marker';
             el.innerHTML = `
@@ -154,12 +142,10 @@ const Map: React.FC = () => {
               <div class="absolute -z-10 w-20 h-20 rounded-full bg-tech-primary opacity-20 animate-ping" style="left: -4px; top: -4px;"></div>
             `;
             
-            // Add new marker
             playerMarker.current = new mapboxgl.Marker(el)
               .setLngLat([longitude, latitude])
               .addTo(map.current);
           } else {
-            // Update existing marker position
             playerMarker.current.setLngLat([longitude, latitude]);
           }
         }
@@ -184,28 +170,21 @@ const Map: React.FC = () => {
     };
   }, [mapboxToken, map.current]);
 
-  // Generate random prompt markers around user's location
   useEffect(() => {
     if (!userLocation || !map.current || !mapboxToken) return;
     
-    // Clear existing markers
     promptMapMarkers.current.forEach(marker => marker.remove());
     promptMapMarkers.current = [];
 
-    // Generate new markers
     const newPromptMarkers = [];
     for (let i = 0; i < 5; i++) {
-      // Create markers within 300-500 meters of user's location
-      const randomDistance = 0.003 + Math.random() * 0.002; // ~300-500 meters
+      const randomDistance = 0.003 + Math.random() * 0.002;
       const randomAngle = Math.random() * 2 * Math.PI;
       const lng = userLocation[0] + randomDistance * Math.cos(randomAngle);
       const lat = userLocation[1] + randomDistance * Math.sin(randomAngle);
       
       const prompt = getRandomPrompt();
       
-      // Calculate position on the screen (for PromptMarker component)
-      // This is a simplification - in a real implementation we'd need to convert
-      // geo coordinates to screen coordinates based on the current map view
       const position = {
         x: 20 + Math.random() * 60,
         y: 20 + Math.random() * 60
@@ -217,7 +196,6 @@ const Map: React.FC = () => {
         coordinates: [lng, lat]
       });
       
-      // Create Mapbox marker
       const el = document.createElement('div');
       el.className = 'prompt-marker';
       el.innerHTML = `
@@ -281,16 +259,13 @@ const Map: React.FC = () => {
       return;
     }
     
-    // Generate a new random prompt
     const prompt = getRandomPrompt();
     
-    // Create a marker at a random location near the user
-    const randomDistance = 0.003 + Math.random() * 0.002; // ~300-500 meters
+    const randomDistance = 0.003 + Math.random() * 0.002;
     const randomAngle = Math.random() * 2 * Math.PI;
     const lng = userLocation[0] + randomDistance * Math.cos(randomAngle);
     const lat = userLocation[1] + randomDistance * Math.sin(randomAngle);
     
-    // Create map marker
     const el = document.createElement('div');
     el.className = 'prompt-marker';
     el.innerHTML = `
@@ -320,7 +295,6 @@ const Map: React.FC = () => {
       
     promptMapMarkers.current.push(marker);
     
-    // Add to state for non-map version
     setPromptMarkers([
       ...promptMarkers, 
       {
@@ -351,15 +325,24 @@ const Map: React.FC = () => {
 
   return (
     <div className="relative h-[calc(100vh-13rem)] overflow-hidden bg-[#f0f2f5] dark:bg-gray-900 rounded-lg border border-tech-light/30">
-      {showTokenInput && (
-        <MapTokenInput onSubmit={handleTokenSubmit} />
+      {isLoadingToken && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="text-white">Loading map...</div>
+        </div>
       )}
       
-      {/* Mapbox Map Container */}
+      {tokenError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+            <h2 className="text-xl font-bold mb-4">Error Loading Map</h2>
+            <p className="text-red-600">Could not load the map. Please try again later.</p>
+          </div>
+        </div>
+      )}
+      
       <div ref={mapContainer} className="absolute inset-0" />
       
-      {/* Fallback UI when map is not available */}
-      {(!mapboxToken || !map.current) && !showTokenInput && (
+      {!mapboxToken && !isLoadingToken && (
         <div className="absolute inset-0 bg-tech-light/10 bg-opacity-50">
           <div className="absolute inset-0 grid grid-cols-6 grid-rows-6">
             {Array.from({ length: 36 }).map((_, index) => (
@@ -367,7 +350,6 @@ const Map: React.FC = () => {
             ))}
           </div>
           
-          {/* Player Location (fallback) */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="relative">
               <div className="w-12 h-12 rounded-full bg-tech-primary border-4 border-white flex items-center justify-center shadow-lg">
@@ -377,7 +359,6 @@ const Map: React.FC = () => {
             </div>
           </div>
           
-          {/* Prompt Markers (fallback) */}
           {promptMarkers.map((marker, index) => (
             <PromptMarker 
               key={index}
@@ -389,7 +370,6 @@ const Map: React.FC = () => {
         </div>
       )}
       
-      {/* Camera Button */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-20">
         <Button 
           className={`rounded-full w-16 h-16 ${state.activePrompt ? 'bg-tech-primary' : 'bg-gray-400'} hover:bg-tech-secondary transition-all duration-300 shadow-lg`}
@@ -405,7 +385,6 @@ const Map: React.FC = () => {
         )}
       </div>
       
-      {/* Scan Area Button */}
       <div className="absolute bottom-6 right-6 z-20">
         <Button 
           className="rounded-full bg-tech-accent hover:bg-tech-accent/80 shadow-md"
@@ -416,7 +395,6 @@ const Map: React.FC = () => {
         </Button>
       </div>
 
-      {/* Image Capture Modal */}
       {showCaptureModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
           <CaptureImage onClose={handleCloseCamera} />
