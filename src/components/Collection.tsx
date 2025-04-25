@@ -4,7 +4,8 @@ import { useGame } from '../context/GameContext';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { Check, X, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Check, X, ThumbsUp, ThumbsDown, Star, Zap } from 'lucide-react';
+import HolographicBorder from './ui/holographic-border';
 
 const Collection: React.FC = () => {
   const { state, voteOnImage } = useGame();
@@ -29,30 +30,39 @@ const Collection: React.FC = () => {
                   <CardTitle className="text-base font-medium">
                     {state.player.username}'s Submission
                   </CardTitle>
-                  <Badge 
-                    variant="outline" 
-                    className={
-                      image.isVerified 
-                        ? "bg-green-100 text-green-800 border-green-200" 
-                        : "bg-amber-100 text-amber-800 border-amber-200"
-                    }
-                  >
-                    {image.isVerified ? (
-                      <><Check className="w-3 h-3 mr-1" /> Verified</>
-                    ) : (
-                      <>Pending Verification</>
+                  <div className="flex items-center space-x-1">
+                    {image.isFirstTimeItem && (
+                      <Badge className="bg-gradient-to-r from-cyan-300 via-purple-500 to-blue-500 text-white border-none flex items-center">
+                        <Star className="w-3 h-3 mr-1" /> First Discovery
+                      </Badge>
                     )}
-                  </Badge>
+                    <Badge 
+                      variant="outline" 
+                      className={
+                        image.isVerified 
+                          ? "bg-green-100 text-green-800 border-green-200" 
+                          : "bg-amber-100 text-amber-800 border-amber-200"
+                      }
+                    >
+                      {image.isVerified ? (
+                        <><Check className="w-3 h-3 mr-1" /> Verified</>
+                      ) : (
+                        <>Pending Verification</>
+                      )}
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               
               <CardContent className="p-0">
                 <div className="relative aspect-video bg-gray-100 overflow-hidden flex items-center justify-center">
-                  <img 
-                    src={image.imageUrl} 
-                    alt="Collected" 
-                    className="w-full h-full object-cover"
-                  />
+                  <HolographicBorder isActive={!!image.isFirstTimeItem} className="w-full h-full">
+                    <img 
+                      src={image.imageUrl} 
+                      alt="Collected" 
+                      className="w-full h-full object-cover"
+                    />
+                  </HolographicBorder>
                   
                   {image.analysis && (
                     <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-2 text-xs backdrop-blur-sm">
@@ -62,6 +72,14 @@ const Collection: React.FC = () => {
                         <p>Text: {image.analysis.text.join(', ')}</p>
                       )}
                       <p>Confidence: {Math.round(image.analysis.matchConfidence * 100)}%</p>
+                    </div>
+                  )}
+                  
+                  {image.isFirstTimeItem && (
+                    <div className="absolute top-2 right-2">
+                      <div className="bg-gradient-to-r from-cyan-300 via-purple-500 to-blue-500 p-2 rounded-full shadow-lg">
+                        <Zap className="w-5 h-5 text-white" />
+                      </div>
                     </div>
                   )}
                 </div>

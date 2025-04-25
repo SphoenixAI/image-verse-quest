@@ -1,16 +1,22 @@
 
 import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Camera, MapPin } from 'lucide-react';
+import { Camera, MapPin, Navigation } from 'lucide-react';
 import { PromptData } from '@/types/game';
 
 interface MapControlsProps {
   activePrompt: PromptData | null;
   onScanArea: () => void;
   onOpenCamera: () => void;
+  onFindLocation: () => void;
 }
 
-const MapControls: React.FC<MapControlsProps> = memo(({ activePrompt, onScanArea, onOpenCamera }) => {
+const MapControls: React.FC<MapControlsProps> = memo(({ 
+  activePrompt, 
+  onScanArea, 
+  onOpenCamera, 
+  onFindLocation 
+}) => {
   return (
     <>
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-20">
@@ -28,7 +34,15 @@ const MapControls: React.FC<MapControlsProps> = memo(({ activePrompt, onScanArea
         )}
       </div>
       
-      <div className="absolute bottom-6 right-6 z-20">
+      <div className="absolute bottom-6 right-6 z-20 flex flex-col space-y-2">
+        <Button 
+          className="rounded-full bg-tech-accent hover:bg-tech-accent/80 shadow-md"
+          onClick={onFindLocation}
+        >
+          <Navigation className="w-5 h-5 mr-1" />
+          Find Me
+        </Button>
+        
         <Button 
           className="rounded-full bg-tech-accent hover:bg-tech-accent/80 shadow-md"
           onClick={onScanArea}

@@ -33,6 +33,9 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         return quest;
       });
       
+      // Update player stats for first-time discoveries
+      const firstTimeItemCount = action.payload.isFirstTimeItem ? 1 : 0;
+      
       return {
         ...state,
         inventory: {
@@ -46,7 +49,8 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
           stats: {
             ...state.player.stats,
             imagesCollected: state.player.stats.imagesCollected + 1,
-            promptsCompleted: state.player.stats.promptsCompleted + 1
+            promptsCompleted: state.player.stats.promptsCompleted + 1,
+            firstDiscoveries: state.player.stats.firstDiscoveries + firstTimeItemCount
           }
         },
         quests: updatedQuestsAfterCollect,

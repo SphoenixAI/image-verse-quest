@@ -113,6 +113,26 @@ export default {
 					'0%': { opacity: '0' },
 					'100%': { opacity: '1' },
 				},
+				'drip-slow': {
+					'0%': { transform: 'translateY(-100%)', opacity: '0.8' },
+					'80%, 100%': { transform: 'translateY(100%)', opacity: '0' },
+				},
+				'drip-medium': {
+					'0%': { transform: 'translateY(-100%)', opacity: '0.8' },
+					'70%, 100%': { transform: 'translateY(100%)', opacity: '0' },
+				},
+				'drip-fast': {
+					'0%': { transform: 'translateY(-100%)', opacity: '0.8' },
+					'60%, 100%': { transform: 'translateY(100%)', opacity: '0' },
+				},
+				'shine-slide': {
+					'0%': { transform: 'translateX(-100%) rotate(45deg)' },
+					'50%, 100%': { transform: 'translateX(200%) rotate(45deg)' },
+				},
+				'color-shift': {
+					'0%, 100%': { filter: 'hue-rotate(0deg)' },
+					'50%': { filter: 'hue-rotate(90deg)' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -121,6 +141,11 @@ export default {
 				'float': 'float 5s ease-in-out infinite',
 				'slide-up': 'slide-up 0.3s ease-out',
 				'fade-in': 'fade-in 0.4s ease-out',
+				'drip-slow': 'drip-slow 4s ease-in infinite',
+				'drip-medium': 'drip-slow 3.5s ease-in infinite 0.5s',
+				'drip-fast': 'drip-slow 3s ease-in infinite 1s',
+				'shine-slide': 'shine-slide 6s ease-in-out infinite',
+				'color-shift': 'color-shift 10s ease-in-out infinite',
 			}
 		}
 	},

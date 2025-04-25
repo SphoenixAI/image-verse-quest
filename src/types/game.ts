@@ -1,3 +1,4 @@
+
 // Game Types
 
 export interface PromptData {
@@ -37,6 +38,7 @@ export interface ImageSubmission {
     robotPart?: RobotPart;
   };
   isVerified: boolean;
+  isFirstTimeItem?: boolean;
 }
 
 export interface ComputerVisionAnalysis {
@@ -108,6 +110,7 @@ export interface PlayerProfile {
     dailyQuestsCompleted: number;
     fakesDetected: number;
     strikesReceived: number;
+    firstDiscoveries: number;
   };
   currentRobot: AssembledRobot | null;
 }
