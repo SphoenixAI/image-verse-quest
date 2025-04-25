@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import { Button } from './ui/button';
@@ -45,7 +46,7 @@ const PromptMarker: React.FC<PromptMarkerProps> = ({ prompt, position, onSelect 
 };
 
 const MapTokenInput = ({ onSubmit }: { onSubmit: (token: string) => void }) => {
-  const [token, setToken] = useState(MAPBOX_TOKEN);
+  const [token, setToken] = useState('');
 
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50">
@@ -228,17 +229,6 @@ const Map: React.FC = () => {
     
     setPromptMarkers(newPromptMarkers.map(({ prompt, position }) => ({ prompt, position })));
   }, [userLocation, getRandomPrompt, mapboxToken]);
-
-  const handleTokenSubmit = (token: string) => {
-    setMapboxToken(token);
-    setShowTokenInput(false);
-    localStorage.setItem('mapbox_token', token);
-    toast({
-      title: "Mapbox Token Saved",
-      description: "The map will now be loaded with your token.",
-      duration: 3000,
-    });
-  };
 
   const handleSelectPrompt = (prompt: PromptData) => {
     setActivePrompt(prompt);
