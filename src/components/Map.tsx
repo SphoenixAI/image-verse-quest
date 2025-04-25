@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { useGame } from '../context/GameContext';
 import { useToast } from '@/hooks/use-toast';
 import CaptureImage from './CaptureImage';
@@ -7,7 +7,6 @@ import { useMapboxToken } from '@/hooks/useMapboxToken';
 import { useMapInitialization } from '@/hooks/useMapInitialization';
 import { useMapMarkers } from '@/hooks/useMapMarkers';
 import MapControls from './map/MapControls';
-import PromptMarker from './map/PromptMarker';
 import { Skeleton } from './ui/skeleton';
 import { PromptData } from '@/types/game';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -18,7 +17,10 @@ const Map: React.FC = () => {
   const [showCaptureModal, setShowCaptureModal] = useState(false);
   const { toast } = useToast();
   const { data: mapboxToken, isLoading: isLoadingToken, error: tokenError } = useMapboxToken();
-  const { mapContainer, map, userLocation } = useMapInitialization(mapboxToken);
+  
+  // Use refs to prevent unnecessary re-renders
+  const scanRequestRef = useRef<number>(0);
+  const { mapContainer, map, userLocation, getCurrentLocation } = useMapInitialization(mapboxToken);
   
   const handleSelectPrompt = useCallback((prompt: PromptData) => {
     setActivePrompt(prompt);
@@ -41,31 +43,39 @@ const Map: React.FC = () => {
       return;
     }
     
-    const prompt = getRandomPrompt();
+    // Use ref to prevent multiple rapid scans
+    const currentRequest = ++scanRequestRef.current;
     
-    const randomDistance = 0.003 + Math.random() * 0.002;
-    const randomAngle = Math.random() * 2 * Math.PI;
-    const lng = userLocation[0] + randomDistance * Math.cos(randomAngle);
-    const lat = userLocation[1] + randomDistance * Math.sin(randomAngle);
-    
-    addMarker(lng, lat, prompt);
-    
-    setPromptMarkers(prev => [
-      ...prev, 
-      {
-        prompt,
-        position: {
-          x: 20 + Math.random() * 60,
-          y: 20 + Math.random() * 60
+    // Only proceed if this is still the most recent scan request
+    setTimeout(() => {
+      if (currentRequest !== scanRequestRef.current) return;
+      
+      const prompt = getRandomPrompt();
+      
+      const randomDistance = 0.003 + Math.random() * 0.002;
+      const randomAngle = Math.random() * 2 * Math.PI;
+      const lng = userLocation[0] + randomDistance * Math.cos(randomAngle);
+      const lat = userLocation[1] + randomDistance * Math.sin(randomAngle);
+      
+      addMarker(lng, lat, prompt);
+      
+      setPromptMarkers(prev => [
+        ...prev, 
+        {
+          prompt,
+          position: {
+            x: 20 + Math.random() * 60,
+            y: 20 + Math.random() * 60
+          }
         }
-      }
-    ]);
-    
-    toast({
-      title: "Area Scanned",
-      description: "New collection opportunity discovered!",
-      duration: 3000,
-    });
+      ]);
+      
+      toast({
+        title: "Area Scanned",
+        description: "New collection opportunity discovered!",
+        duration: 3000,
+      });
+    }, 300); // Add a small delay to prevent rapid consecutive scans
   }, [userLocation, map, addMarker, getRandomPrompt, toast]);
 
   const handleOpenCamera = useCallback(() => {
@@ -77,6 +87,10 @@ const Map: React.FC = () => {
   const handleCloseCamera = useCallback(() => {
     setShowCaptureModal(false);
   }, []);
+  
+  const handleFindLocation = useCallback(() => {
+    getCurrentLocation();
+  }, [getCurrentLocation]);
 
   return (
     <div className="relative h-[calc(100vh-13rem)] overflow-hidden bg-[#f0f2f5] dark:bg-gray-900 rounded-lg border border-tech-light/30">
@@ -101,6 +115,7 @@ const Map: React.FC = () => {
         activePrompt={state.activePrompt}
         onScanArea={handleScanArea}
         onOpenCamera={handleOpenCamera}
+        onFindLocation={handleFindLocation}
       />
 
       {showCaptureModal && (

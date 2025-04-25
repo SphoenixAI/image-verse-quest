@@ -1,5 +1,5 @@
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { PromptData } from '@/types/game';
 
@@ -12,9 +12,11 @@ export const useMapMarkers = (
 ) => {
   const promptMapMarkers = useRef<mapboxgl.Marker[]>([]);
   const [markersAdded, setMarkersAdded] = useState(false);
+  const initialMarkersGenerated = useRef(false);
 
   useEffect(() => {
-    if (!userLocation || !map.current || !mapboxToken || markersAdded) return;
+    // Only generate markers once when the map, user location, and token are all available
+    if (!userLocation || !map.current || !mapboxToken || initialMarkersGenerated.current) return;
     
     // Clear any existing markers
     promptMapMarkers.current.forEach(marker => marker.remove());
@@ -60,15 +62,16 @@ export const useMapMarkers = (
     }
     
     setMarkersAdded(true);
+    initialMarkersGenerated.current = true;
     
     return () => {
       promptMapMarkers.current.forEach(marker => marker.remove());
       promptMapMarkers.current = [];
     };
-  }, [userLocation, getRandomPrompt, mapboxToken, map, handleSelectPrompt, markersAdded]);
+  }, [userLocation, getRandomPrompt, mapboxToken, map, handleSelectPrompt]);
 
   // Add a method to add a new marker
-  const addMarker = (lng: number, lat: number, prompt: PromptData) => {
+  const addMarker = useCallback((lng: number, lat: number, prompt: PromptData) => {
     if (!map.current) return;
     
     const el = document.createElement('div');
@@ -100,7 +103,7 @@ export const useMapMarkers = (
       
     promptMapMarkers.current.push(marker);
     return marker;
-  };
+  }, [map, handleSelectPrompt]);
 
   return { markers: promptMapMarkers, addMarker };
 };

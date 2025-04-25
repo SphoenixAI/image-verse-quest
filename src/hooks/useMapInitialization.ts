@@ -9,6 +9,7 @@ export const useMapInitialization = (mapboxToken: string | undefined) => {
   const map = useRef<mapboxgl.Map | null>(null);
   const playerMarker = useRef<mapboxgl.Marker | null>(null);
   const isMapInitialized = useRef<boolean>(false);
+  const locationWatchId = useRef<number | null>(null);
   const { toast } = useToast();
 
   const getCurrentLocation = useCallback(() => {
@@ -89,23 +90,19 @@ export const useMapInitialization = (mapboxToken: string | undefined) => {
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v12',
       center: userLocation || [-74.5, 40],
-      zoom: 16
+      zoom: 16,
+      preserveDrawingBuffer: true, // Prevent constant redraws
     });
 
     const navControl = new mapboxgl.NavigationControl();
     map.current.addControl(navControl, 'top-right');
     
-    const geolocateControl = new mapboxgl.GeolocateControl({
-      positionOptions: {
-        enableHighAccuracy: true
-      },
-      trackUserLocation: true,
-      showUserHeading: true
-    });
-    
-    map.current.addControl(geolocateControl);
-    
     return () => {
+      if (locationWatchId.current !== null) {
+        navigator.geolocation.clearWatch(locationWatchId.current);
+        locationWatchId.current = null;
+      }
+      
       map.current?.remove();
       map.current = null;
       isMapInitialized.current = false;
@@ -113,55 +110,58 @@ export const useMapInitialization = (mapboxToken: string | undefined) => {
   }, [mapboxToken, userLocation]);
 
   useEffect(() => {
-    if (!mapboxToken) return;
+    if (!mapboxToken || locationWatchId.current !== null) return;
     
-    const watchId = navigator.geolocation.watchPosition(
+    locationWatchId.current = navigator.geolocation.watchPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        setUserLocation([longitude, latitude]);
-        
-        if (map.current && !playerMarker.current) {
-          map.current.setCenter([longitude, latitude]);
-        }
-        
-        if (userLocation && map.current) {
-          if (!playerMarker.current) {
-            const el = document.createElement('div');
-            el.className = 'player-marker';
-            el.innerHTML = `
-              <div class="w-12 h-12 rounded-full bg-tech-primary border-4 border-white flex items-center justify-center shadow-lg">
-                <div class="w-4 h-4 rounded-full bg-white"></div>
-              </div>
-              <div class="absolute -z-10 w-20 h-20 rounded-full bg-tech-primary opacity-20 animate-ping" style="left: -4px; top: -4px;"></div>
-            `;
-            
-            playerMarker.current = new mapboxgl.Marker(el)
-              .setLngLat([longitude, latitude])
-              .addTo(map.current);
-          } else {
-            playerMarker.current.setLngLat([longitude, latitude]);
+        setUserLocation((prev) => {
+          // Only update if position has changed significantly
+          if (prev && 
+              Math.abs(prev[0] - longitude) < 0.00001 && 
+              Math.abs(prev[1] - latitude) < 0.00001) {
+            return prev;
           }
+          return [longitude, latitude];
+        });
+        
+        if (playerMarker.current && map.current) {
+          playerMarker.current.setLngLat([longitude, latitude]);
+        } else if (map.current && !playerMarker.current) {
+          const el = document.createElement('div');
+          el.className = 'player-marker';
+          el.innerHTML = `
+            <div class="w-12 h-12 rounded-full bg-tech-primary border-4 border-white flex items-center justify-center shadow-lg">
+              <div class="w-4 h-4 rounded-full bg-white"></div>
+            </div>
+            <div class="absolute -z-10 w-20 h-20 rounded-full bg-tech-primary opacity-20 animate-ping" style="left: -4px; top: -4px;"></div>
+          `;
+          
+          playerMarker.current = new mapboxgl.Marker(el)
+            .setLngLat([longitude, latitude])
+            .addTo(map.current);
+          
+          // Initialize to user's location
+          map.current.setCenter([longitude, latitude]);
         }
       },
       (error) => {
-        console.error('Error getting location:', error);
-        toast({
-          title: "Location Error",
-          description: `Could not get your location: ${error.message}`,
-          variant: "destructive",
-        });
+        console.error('Error watching location:', error);
       },
       {
         enableHighAccuracy: true,
-        maximumAge: 0,
+        maximumAge: 10000,
         timeout: 5000
       }
     );
     
     return () => {
-      navigator.geolocation.clearWatch(watchId);
+      if (locationWatchId.current !== null) {
+        navigator.geolocation.clearWatch(locationWatchId.current);
+        locationWatchId.current = null;
+      }
     };
-  }, [mapboxToken, toast, userLocation]);
+  }, [mapboxToken, toast]);
 
   return { mapContainer, map, userLocation, getCurrentLocation };
 };
