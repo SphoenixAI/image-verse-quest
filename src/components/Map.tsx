@@ -9,6 +9,7 @@ import { useMapMarkers } from '@/hooks/useMapMarkers';
 import MapControls from './map/MapControls';
 import PromptMarker from './map/PromptMarker';
 import { Skeleton } from './ui/skeleton';
+import { PromptData } from '@/types/game';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 const Map: React.FC = () => {
@@ -19,8 +20,7 @@ const Map: React.FC = () => {
   const { data: mapboxToken, isLoading: isLoadingToken, error: tokenError } = useMapboxToken();
   
   const { mapContainer, map, userLocation } = useMapInitialization(mapboxToken);
-  const promptMapMarkers = useMapMarkers(map, userLocation, getRandomPrompt, handleSelectPrompt, mapboxToken);
-
+  
   const handleSelectPrompt = (prompt: PromptData) => {
     setActivePrompt(prompt);
     toast({
@@ -29,6 +29,8 @@ const Map: React.FC = () => {
       duration: 3000,
     });
   };
+  
+  const promptMapMarkers = useMapMarkers(map, userLocation, getRandomPrompt, handleSelectPrompt, mapboxToken);
 
   const handleScanArea = () => {
     if (!userLocation || !map.current) {
@@ -70,11 +72,13 @@ const Map: React.FC = () => {
       handleSelectPrompt(prompt);
     });
     
-    const marker = new mapboxgl.Marker(el)
-      .setLngLat([lng, lat])
-      .addTo(map.current!);
-      
-    promptMapMarkers.current.push(marker);
+    import('mapbox-gl').then(mapboxgl => {
+      const marker = new mapboxgl.Marker(el)
+        .setLngLat([lng, lat])
+        .addTo(map.current!);
+        
+      promptMapMarkers.current.push(marker);
+    });
     
     setPromptMarkers([
       ...promptMarkers, 

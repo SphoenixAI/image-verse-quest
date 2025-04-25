@@ -68,7 +68,9 @@ export const useMapMarkers = (
       promptMapMarkers.current.push(marker);
     }
     
-    return newPromptMarkers.map(({ prompt, position }) => ({ prompt, position }));
+    return () => {
+      promptMapMarkers.current.forEach(marker => marker.remove());
+    };
   }, [userLocation, getRandomPrompt, mapboxToken, map, handleSelectPrompt]);
 
   return promptMapMarkers;
