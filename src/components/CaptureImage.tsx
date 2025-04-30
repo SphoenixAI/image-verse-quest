@@ -308,8 +308,10 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
             </span>
           </div>
           
-          <div className="aspect-square bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center relative" 
-               onClick={capturedImage ? handleToggleAnalysis : undefined}>
+          <div 
+            className="aspect-square bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center relative cursor-pointer" 
+            onClick={capturedImage ? handleToggleAnalysis : undefined}
+          >
             {usingCamera && !capturedImage ? (
               <>
                 <video 
@@ -330,15 +332,17 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
                   />
                 </HolographicBorder>
                 
-                {/* Luminous HUD display over the image */}
+                {/* Enhanced Luminous HUD display over the image */}
                 <LuminousHUD 
                   isActive={showAnalysis && !showSuccess} 
                   analysisData={detailedAnalysis}
                   isProcessing={imageAnalysis.isPending || submitImageMutation.isPending}
+                  onToggle={handleToggleAnalysis}
                 />
                 
                 {detailedAnalysis && !showAnalysis && !showSuccess && (
-                  <div className="absolute bottom-2 right-2 p-1 bg-tech-primary/60 backdrop-blur-sm rounded-md text-xs text-white">
+                  <div className="absolute bottom-2 right-2 bg-tech-primary/80 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs text-white shadow-lg flex items-center animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-cyan-400 mr-1.5"></span>
                     Tap for analysis
                   </div>
                 )}

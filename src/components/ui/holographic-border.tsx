@@ -19,26 +19,36 @@ const HolographicBorder: React.FC<HolographicBorderProps> = ({
 
   return (
     <div className={cn("relative overflow-hidden rounded-lg", className)}>
-      {/* Holographic dripping oil slick effect container */}
+      {/* Enhanced holographic dripping oil slick effect container */}
       <div className="absolute inset-0 z-0 rounded-lg overflow-hidden">
+        {/* Base gradient layer */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-300 via-purple-500 to-blue-500 animate-pulse-gentle" />
         
-        {/* Dripping effect elements */}
-        <div className="absolute bottom-0 left-1/4 w-1 h-8 bg-cyan-300 rounded-t-full animate-drip-slow" />
-        <div className="absolute bottom-0 left-2/4 w-1.5 h-10 bg-blue-400 rounded-t-full animate-drip-medium" />
-        <div className="absolute bottom-0 left-3/4 w-1 h-6 bg-purple-400 rounded-t-full animate-drip-fast" />
+        {/* Beveled edge effect */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent opacity-70" style={{mixBlendMode: 'overlay'}} />
+        <div className="absolute inset-0 bg-gradient-to-tl from-black/20 to-transparent" style={{mixBlendMode: 'multiply'}} />
         
-        {/* Oil slick shine effects */}
-        <div className="absolute inset-0 opacity-50">
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-20 animate-shine-slide" />
+        {/* Enhanced dripping effect elements with shadows */}
+        <div className="absolute bottom-0 left-1/6 w-1 h-8 bg-gradient-to-b from-cyan-300 to-cyan-400/80 rounded-t-full animate-drip-slow shadow-lg shadow-cyan-300/30" />
+        <div className="absolute bottom-0 left-2/6 w-1.5 h-10 bg-gradient-to-b from-blue-400 to-blue-500/80 rounded-t-full animate-drip-medium shadow-lg shadow-blue-400/30" />
+        <div className="absolute bottom-0 left-3/6 w-1 h-6 bg-gradient-to-b from-purple-400 to-purple-500/80 rounded-t-full animate-drip-fast shadow-lg shadow-purple-400/30" />
+        <div className="absolute bottom-0 left-4/6 w-1.5 h-9 bg-gradient-to-b from-cyan-300 to-cyan-400/80 rounded-t-full animate-drip-medium shadow-lg shadow-cyan-300/30" style={{animationDelay: '1s'}} />
+        <div className="absolute bottom-0 left-5/6 w-1 h-7 bg-gradient-to-b from-blue-400 to-blue-500/80 rounded-t-full animate-drip-slow shadow-lg shadow-blue-400/30" style={{animationDelay: '0.5s'}} />
+        
+        {/* Enhanced oil slick shine effects */}
+        <div className="absolute inset-0 opacity-60">
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white to-transparent opacity-30 animate-shine-slide" />
         </div>
         
-        {/* Prismatic color shift */}
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-200 via-blue-500 to-purple-600 opacity-40 mix-blend-overlay animate-color-shift" />
+        {/* Enhanced prismatic color shift */}
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-200 via-blue-500 to-purple-600 opacity-50 mix-blend-overlay animate-color-shift" />
+        
+        {/* Inner shadow */}
+        <div className="absolute inset-0 shadow-inner shadow-black/20 rounded-lg" />
       </div>
       
       {/* Content container with slight padding to show the border */}
-      <div className="relative z-10 m-1 bg-white dark:bg-tech-dark rounded-lg overflow-hidden">
+      <div className="relative z-10 m-1.5 bg-white dark:bg-tech-dark rounded-md overflow-hidden shadow-md">
         {children}
       </div>
     </div>
