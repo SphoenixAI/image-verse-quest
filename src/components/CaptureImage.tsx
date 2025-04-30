@@ -10,6 +10,7 @@ import { useImageAnalysis } from '@/hooks/useImageAnalysis';
 import { useSubmitImage } from '@/hooks/useSubmitImage';
 import HolographicBorder from './ui/holographic-border';
 import { Dialog, DialogContent } from './ui/dialog';
+import LuminousHUD from './ui/luminous-hud';
 
 interface CaptureImageProps {
   onClose: () => void;
@@ -22,6 +23,7 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
   const [isFirstTimeItem, setIsFirstTimeItem] = useState(false);
   const [detailedAnalysis, setDetailedAnalysis] = useState<any>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -150,6 +152,7 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
     setCapturedImage(null);
     setDetailedAnalysis(null);
     setIsFirstTimeItem(false);
+    setShowAnalysis(false);
     
     if (usingCamera) {
       startCamera();
@@ -177,13 +180,15 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
     
     try {
       // First analyze the image
+      setShowAnalysis(true); // Show the processing HUD
+      
       const analysis = await imageAnalysis.mutateAsync({
         imageUrl: capturedImage,
         promptText: state.activePrompt.text,
       });
 
       // Store the detailed analysis for display
-      setDetailedAnalysis(analysis);
+      setDetailedAnalysis(analysis.analysis);
 
       // Check if this is a first-time registered item
       const isFirstTime = checkIfFirstTimeItem(analysis.analysis);
@@ -264,6 +269,7 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
           variant: "destructive",
         });
         setCapturedImage(null);
+        setShowAnalysis(false);
       }
     } catch (error) {
       console.error("Error submitting image:", error);
@@ -272,12 +278,19 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
         description: "There was an error submitting your image. Please try again.",
         variant: "destructive",
       });
+      setShowAnalysis(false);
     }
   };
 
   const handleCloseSuccess = () => {
     setShowSuccess(false);
     onClose();
+  };
+
+  const handleToggleAnalysis = () => {
+    if (detailedAnalysis) {
+      setShowAnalysis(!showAnalysis);
+    }
   };
 
   return (
@@ -295,7 +308,8 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
             </span>
           </div>
           
-          <div className="aspect-square bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center relative">
+          <div className="aspect-square bg-gray-200 dark:bg-gray-800 rounded-lg overflow-hidden flex items-center justify-center relative" 
+               onClick={capturedImage ? handleToggleAnalysis : undefined}>
             {usingCamera && !capturedImage ? (
               <>
                 <video 
@@ -307,13 +321,28 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
                 <canvas ref={canvasRef} className="hidden" />
               </>
             ) : capturedImage ? (
-              <HolographicBorder isActive={isFirstTimeItem} className="w-full h-full">
-                <img 
-                  src={capturedImage} 
-                  alt="Captured" 
-                  className="w-full h-full object-cover"
+              <>
+                <HolographicBorder isActive={isFirstTimeItem} className="w-full h-full">
+                  <img 
+                    src={capturedImage} 
+                    alt="Captured" 
+                    className="w-full h-full object-cover"
+                  />
+                </HolographicBorder>
+                
+                {/* Luminous HUD display over the image */}
+                <LuminousHUD 
+                  isActive={showAnalysis && !showSuccess} 
+                  analysisData={detailedAnalysis}
+                  isProcessing={imageAnalysis.isPending || submitImageMutation.isPending}
                 />
-              </HolographicBorder>
+                
+                {detailedAnalysis && !showAnalysis && !showSuccess && (
+                  <div className="absolute bottom-2 right-2 p-1 bg-tech-primary/60 backdrop-blur-sm rounded-md text-xs text-white">
+                    Tap for analysis
+                  </div>
+                )}
+              </>
             ) : (
               <div className="text-center p-4">
                 <Camera className="w-12 h-12 mx-auto mb-2 text-gray-400" />
@@ -434,13 +463,13 @@ const CaptureImage: React.FC<CaptureImageProps> = ({ onClose }) => {
             {detailedAnalysis && (
               <div className="text-left mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm">
                 <h4 className="font-bold text-center mb-1">AI Analysis</h4>
-                {detailedAnalysis.analysis.objects && detailedAnalysis.analysis.objects.length > 0 && (
-                  <p><span className="font-semibold">Detected:</span> {detailedAnalysis.analysis.objects.map((obj: any) => `${obj.name} (${Math.round(obj.confidence * 100)}%)`).join(', ')}</p>
+                {detailedAnalysis.objects && detailedAnalysis.objects.length > 0 && (
+                  <p><span className="font-semibold">Detected:</span> {detailedAnalysis.objects.map((obj: any) => `${obj.name} (${Math.round(obj.confidence * 100)}%)`).join(', ')}</p>
                 )}
-                {detailedAnalysis.analysis.text && detailedAnalysis.analysis.text.length > 0 && (
-                  <p><span className="font-semibold">Text:</span> {detailedAnalysis.analysis.text.join(', ')}</p>
+                {detailedAnalysis.text && detailedAnalysis.text.length > 0 && (
+                  <p><span className="font-semibold">Text:</span> {detailedAnalysis.text.join(', ')}</p>
                 )}
-                <p><span className="font-semibold">Match confidence:</span> {Math.round(detailedAnalysis.analysis.matchConfidence * 100)}%</p>
+                <p><span className="font-semibold">Match confidence:</span> {Math.round(detailedAnalysis.analysis?.matchConfidence * 100 || detailedAnalysis.matchConfidence * 100)}%</p>
               </div>
             )}
             
