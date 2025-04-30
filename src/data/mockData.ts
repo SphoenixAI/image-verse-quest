@@ -169,7 +169,8 @@ export const MOCK_PLAYER_PROFILE: PlayerProfile = {
     totalVotes: 50,
     dailyQuestsCompleted: 12,
     fakesDetected: 8,
-    strikesReceived: 0
+    strikesReceived: 0,
+    firstDiscoveries: 5
   },
   currentRobot: MOCK_ASSEMBLED_ROBOT
 };
