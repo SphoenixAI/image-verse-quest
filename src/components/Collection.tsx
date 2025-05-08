@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useGame } from '../context/GameContext';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
@@ -11,7 +12,7 @@ import { useImageVoting } from '@/hooks/useImageVoting';
 import { useQueryClient } from '@tanstack/react-query';
 
 const Collection: React.FC = () => {
-  const { state } = useGame();
+  const { state, voteOnImage } = useGame();
   const { toast } = useToast();
   const { images } = state.inventory;
   const queryClient = useQueryClient();
@@ -70,6 +71,7 @@ const Collection: React.FC = () => {
 const ImageCard = ({ image, onVote, playerUserId }) => {
   // Use the new hook for voting
   const { hasVoted, isLoading } = useImageVoting(image.id);
+  const { state } = useGame();
   
   return (
     <Card key={image.id} className="overflow-hidden border border-tech-light/30 shadow-md hover:shadow-lg transition-all duration-300">
