@@ -92,6 +92,30 @@ export type Database = {
           },
         ]
       }
+      user_votes: {
+        Row: {
+          created_at: string
+          id: string
+          image_id: string
+          user_id: string
+          vote_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_id: string
+          user_id: string
+          vote_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_id?: string
+          user_id?: string
+          vote_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

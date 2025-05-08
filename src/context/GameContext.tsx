@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { GameState, PromptData, ImageSubmission, RobotPart, AssembledRobot } from '../types/game';
 import { INITIAL_GAME_STATE, MOCK_PROMPTS } from '../data/mockData';
@@ -6,7 +5,7 @@ import { INITIAL_GAME_STATE, MOCK_PROMPTS } from '../data/mockData';
 type GameAction = 
   | { type: 'SET_ACTIVE_PROMPT'; payload: PromptData | null }
   | { type: 'ADD_IMAGE_SUBMISSION'; payload: ImageSubmission }
-  | { type: 'VOTE_ON_IMAGE'; payload: { id: string; isAuthentic: boolean } }
+  | { type: 'VOTE_IMAGE'; payload: { imageId: string; isAuthentic: boolean } }
   | { type: 'ADD_ROBOT_PART'; payload: RobotPart }
   | { type: 'ASSEMBLE_ROBOT'; payload: AssembledRobot }
   | { type: 'SET_CURRENT_ROBOT'; payload: string }
@@ -57,7 +56,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         activePrompt: null // Reset active prompt after submission
       };
     
-    case 'VOTE_ON_IMAGE':
+    case 'VOTE_IMAGE':
       // Update quest progress if there's a vote quest
       const updatedQuestsAfterVote = state.quests.map(quest => {
         if (quest.type === 'vote' && !quest.completed) {
@@ -76,7 +75,7 @@ const gameReducer = (state: GameState, action: GameAction): GameState => {
         inventory: {
           ...state.inventory,
           images: state.inventory.images.map(img => 
-            img.id === action.payload.id
+            img.id === action.payload.imageId
               ? {
                   ...img,
                   voteCount: {
@@ -187,7 +186,7 @@ interface GameContextProps {
   state: GameState;
   setActivePrompt: (prompt: PromptData | null) => void;
   addImageSubmission: (submission: ImageSubmission) => void;
-  voteOnImage: (id: string, isAuthentic: boolean) => void;
+  voteOnImage: (imageId: string, isAuthentic: boolean) => void;
   addRobotPart: (part: RobotPart) => void;
   assembleRobot: (robot: AssembledRobot) => void;
   setCurrentRobot: (id: string) => void;
@@ -210,8 +209,17 @@ export const GameProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     dispatch({ type: 'ADD_IMAGE_SUBMISSION', payload: submission });
   };
 
-  const voteOnImage = (id: string, isAuthentic: boolean) => {
-    dispatch({ type: 'VOTE_ON_IMAGE', payload: { id, isAuthentic } });
+  const voteOnImage = (imageId: string, isAuthentic: boolean) => {
+    dispatch({
+      type: "VOTE_IMAGE",
+      payload: {
+        imageId,
+        isAuthentic,
+      },
+    });
+    
+    // Note: The actual API call is now handled by the useImageVoting hook
+    // This function now just updates the local state for immediate UI feedback
   };
 
   const addRobotPart = (part: RobotPart) => {
