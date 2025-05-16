@@ -8,7 +8,7 @@ type VoteType = "authentic" | "fake";
 // Define type for the RPC function parameters
 interface IncrementImageVoteParams {
   image_id: string;
-  vote_type: VoteType;
+  vote_type: string;
 }
 
 /**
@@ -52,7 +52,7 @@ export async function submitVote(
       {
         image_id: imageId,
         vote_type: voteType as string // Cast to string to bypass the type checking issue
-      }
+      } as unknown as IncrementImageVoteParams
     );
 
     if (updateError) {
