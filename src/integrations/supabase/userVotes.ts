@@ -41,8 +41,8 @@ export async function submitVote(
       vote_type: string;
     };
     
-    // Call the RPC function with proper typing
-    const { error: updateError } = await supabase.rpc<null, IncrementVoteParams>(
+    // Call the RPC function with proper typing - fixing the generic parameters
+    const { error: updateError } = await supabase.rpc(
       "increment_image_vote",
       {
         image_id: imageId,
