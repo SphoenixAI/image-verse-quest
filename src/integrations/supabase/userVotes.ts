@@ -1,5 +1,15 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "./types";
+
+// Define proper types for the vote_type
+type VoteType = "authentic" | "fake";
+
+// Define type for the RPC function parameters
+interface IncrementImageVoteParams {
+  image_id: string;
+  vote_type: VoteType;
+}
 
 /**
  * Submit a user vote on an image's authenticity
@@ -10,6 +20,9 @@ export async function submitVote(
   isAuthentic: boolean
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Convert boolean to the appropriate vote type
+    const voteType: VoteType = isAuthentic ? "authentic" : "fake";
+    
     // Insert the vote into the user_votes table
     const { error } = await supabase
       .from("user_votes")
@@ -17,8 +30,8 @@ export async function submitVote(
         {
           user_id: userId,
           image_id: imageId,
-          vote_type: isAuthentic ? "authentic" : "fake",
-        } as any // Type assertion to bypass TypeScript's type checking
+          vote_type: voteType,
+        } as Database["public"]["Tables"]["user_votes"]["Insert"]
       ]);
 
     if (error) {
@@ -33,15 +46,12 @@ export async function submitVote(
     }
 
     // Update the votes count in the image_submissions table
-    const voteType = isAuthentic ? "authentic" : "fake";
-    
-    // Use type assertion to bypass TypeScript's type checking for the RPC parameters
-    const { error: updateError } = await supabase.rpc(
+    const { error: updateError } = await supabase.rpc<null>(
       "increment_image_vote",
       {
         image_id: imageId,
         vote_type: voteType
-      } as any // Type assertion to bypass TypeScript type checking
+      } as IncrementImageVoteParams
     );
 
     if (updateError) {
