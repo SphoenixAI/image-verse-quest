@@ -46,7 +46,7 @@ export async function submitVote(
     }
 
     // Update the votes count in the image_submissions table
-    const { error: updateError } = await supabase.rpc<null>(
+    const { error: updateError } = await supabase.rpc(
       "increment_image_vote",
       {
         image_id: imageId,
