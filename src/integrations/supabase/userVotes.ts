@@ -35,11 +35,20 @@ export async function submitVote(
     // Update the votes count in the image_submissions table
     const voteType = isAuthentic ? "authentic" : "fake";
     
-    // Fix: Update the RPC call to use a properly typed approach
-    const { error: updateError } = await supabase.rpc("increment_image_vote", {
-      image_id: imageId,
-      vote_type: voteType
-    } as any); // Use type assertion to bypass TypeScript error
+    // Define the parameter types for the RPC call
+    type IncrementVoteParams = {
+      image_id: string;
+      vote_type: string;
+    };
+    
+    // Call the RPC function with proper typing
+    const { error: updateError } = await supabase.rpc<null, IncrementVoteParams>(
+      "increment_image_vote",
+      {
+        image_id: imageId,
+        vote_type: voteType
+      }
+    );
 
     if (updateError) {
       console.error("Error updating vote count:", updateError);
