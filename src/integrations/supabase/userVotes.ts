@@ -46,12 +46,13 @@ export async function submitVote(
     }
 
     // Update the votes count in the image_submissions table
+    // Use a more direct approach with explicit typing
     const { error: updateError } = await supabase.rpc(
       "increment_image_vote",
       {
         image_id: imageId,
-        vote_type: voteType
-      } as IncrementImageVoteParams
+        vote_type: voteType as string // Cast to string to bypass the type checking issue
+      }
     );
 
     if (updateError) {
